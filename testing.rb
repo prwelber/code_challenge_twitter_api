@@ -32,8 +32,8 @@ def followers_of_followers
 				followers.each do |follower|
 					csv << ["", follower]
 				end
-			cursor = followers.next_cursor
 			end
+			cursor = followers.next_cursor
 			break if cursor == 0
 		rescue Twitter::Error::TooManyRequests => error
 			sleep error.rate_limit.reset_in

@@ -54,11 +54,52 @@ get_followers("mizzenandmain")
 
 # took some of this from https://gist.github.com/ronhornbaker/7817176
 
+# second iteration of pulling nested followers
+# beginning is similar to above
+def followers_of_followers
+  rds = redis
+  client = twitter
+  redis_data = rds.lrange 'user_list', 0, 10
+  followers_csv = CSV.open("nested_followers.csv", "wb") do |csv|
+    csv << ["Mizzen Follower ID", "Followers of that ID"]
+  cursor = -1
+  while (cursor != 0) do
+    begin
+      # loop over redis data that contains userIDs of mizzen followers
+      redis_data.each do |mizzen_follower|
+        mizzen_follower = mizzen_follower.to_i
+        # write mizzen follower to csv
+        csv << [mizzen_follower, "followers in this column"]
+        # api call for followers of the mizzen follower
+        followers = client.follower_ids(mizzen_follower, {:cursor => cursor, :count => 200})
+        # write nested followers to csv
+        followers.each do |follower|
+          csv << ["", follower]
+        end
+      end
+      # go to next cursor
+      cursor = followers.next_cursor
+      break if cursor == 0
+    rescue Twitter::Error::TooManyRequests => error
+      sleep error.rate_limit.reset_in
+      retry
+    else
+      raise
+      end
+    end
+  end
+end
+
+followers_of_followers()
+
+# these 2nd iterations were the result of viewing this on github
+# took some of this from https://gist.github.com/ronhornbaker/7817176
 
 
+##-----------------------------------------------------------##
 
 
-### this was the initial method
+### this was the first round attempt at pulling mizzen users - this works
 # request to twitter client for mizzen and main list of user ids
 follower_ids = client.follower_ids('mizzenandmain')
 begin
@@ -77,7 +118,7 @@ end
 
 
 
-# open a writable csv file and write a header then loop through the followers hash and put each id into the csv file
+# open a writable csv file and loop through the followers hash and put each id into the csv file
 CSV.open('mizzen_followers.csv', 'wb') do |csv|
   csv << ["Mizzen and Main Followers"]
   followers = rds.lrange 'user_list', 0, -1
@@ -118,15 +159,3 @@ CSV.open('followers_of_followers.csv', 'wb') do |csv|
 end
 
 
-
-
-
-
-
-
-
-
-# outfile = File.new("twitter.txt", "w")
-# outfile.puts("These are the followers")
-# outfile.puts(followers.to_h)
-# outfile.close
