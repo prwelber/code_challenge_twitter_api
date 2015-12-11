@@ -9,10 +9,10 @@ def redis
 end
 
 def twitter
-	client = Twitter::REST::Client.new do |config|
-	  config.consumer_key    = "KY6Fsv5nrEnFc2jAarOhFd154"
-	  config.consumer_secret = "Gsv9390w3IFx42Dog7w2QqEsv7aUtO1xkhk0CXoc8awyI0zP6a"
-	end
+  client = Twitter::REST::Client.new do |config|
+    config.consumer_key    = ENV['twitter_consumer_key']
+    config.consumer_secret = ENV['twitter_consumer_secret']
+  end
 end
 
 # second iteration of pulling nested followers
