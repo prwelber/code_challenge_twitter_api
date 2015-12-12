@@ -71,10 +71,10 @@ def followers_of_followers
         # write mizzen follower to csv
         csv << [mizzen_follower, "followers in this column"]
         # api call for followers of the mizzen follower
-        followers = client.follower_ids(mizzen_follower, {:cursor => cursor, :count => 200})
+        followers = client.followers(mizzen_follower, {:cursor => cursor, :count => 200})
         # write nested followers to csv
         followers.each do |follower|
-          csv << ["", follower]
+          csv << ["", follower.id]
         end
       end
       # go to next cursor

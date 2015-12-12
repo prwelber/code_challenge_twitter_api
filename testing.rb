@@ -20,7 +20,7 @@ def followers_of_followers
 	rds = redis
 	client = twitter
 	redis_data = rds.lrange 'user_list', 0, 10
-	followers_csv = CSV.open("nested_followers.csv", "wb") do |csv|
+	followers_csv = CSV.open("second_nested_followers.csv", "wb") do |csv|
 		csv << ["Mizzen Follower ID", "Followers of that ID"]
 	cursor = -1
 	while (cursor != 0) do
@@ -28,9 +28,9 @@ def followers_of_followers
 			redis_data.each do |mizzen_follower|
 				mizzen_follower = mizzen_follower.to_i
 				csv << [mizzen_follower, "followers in this column"]
-				followers = client.follower_ids(mizzen_follower, {:cursor => cursor, :count => 200})
+				followers = client.followers(mizzen_follower, {:cursor => cursor, :count => 200})
 				followers.each do |follower|
-					csv << ["", follower]
+					csv << ["", follower.id]
 				end
 			end
 			cursor = followers.next_cursor
